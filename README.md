@@ -19,7 +19,8 @@ Get the latest build from the [Releases page](https://github.com/shashmit/hani/r
 
 | Platform | File | Needs |
 | --- | --- | --- |
-| Android | `hani-<version>-android.apk` | Android 7.0 or newer |
+| Android | `hani-<version>-android.apk` | Android 7.0 or newer, 64-bit ARM phone (nearly every phone) |
+| Android, other devices | `hani-<version>-android-universal.apk` | Android 7.0 or newer; older 32-bit phones, emulators and Chromebooks |
 | macOS | `hani-<version>-macos-arm64.dmg` | Apple silicon Mac, macOS 10.13 or newer |
 
 ### Installing on Android
