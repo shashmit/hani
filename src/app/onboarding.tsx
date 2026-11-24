@@ -36,6 +36,7 @@ import {
   StashScene,
   TasksScene,
 } from '@/components/onboarding/Scenes';
+import { importBackup } from '@/lib/backupActions';
 import { usePrefs } from '@/store/prefs';
 import { colors, fonts, isDark, themed, type Palette } from '@/theme';
 
@@ -53,6 +54,8 @@ type Page = {
   source?: string;
   /** What Hazel has to say about it. */
   quip?: string;
+  /** Offers to bring a stash over from a backup file, for people moving in. */
+  restore?: boolean;
 };
 
 /**
@@ -72,6 +75,7 @@ const PAGES: Page[] = [
     ground: 'ground',
     title: 'Meet Hazel.',
     body: 'hani keeps your money, tasks, links and notes in one cosy stash, and all of it stays on your phone. Each part is built on a simple idea from behavioural science. Here is the short version.',
+    restore: true,
   },
   {
     key: 'money',
@@ -124,6 +128,7 @@ const PAGES: Page[] = [
     ground: 'ground',
     title: 'Ready to stash?',
     body: 'Hazel will be around; give her a tap now and then. No account, no cloud: your stash never leaves this phone.',
+    restore: true,
   },
 ];
 
@@ -172,6 +177,8 @@ export default function Onboarding() {
     setLeaving(true);
     setTimeout(leave, 800);
   };
+  // Moving in from another device: the backup goes in, and the tour is done.
+  const restore = () => importBackup(finish);
 
   // Background blends from one page's ground to the next.
   const grounds = PAGES.map((p) => colors[p.ground]);
@@ -228,7 +235,7 @@ export default function Onboarding() {
           style={{ flex: 1 }}
         >
           {PAGES.map((p, i) => (
-            <PageView key={p.key} p={p} i={i} x={x} width={width} active={page === i} breathe={breathe} />
+            <PageView key={p.key} p={p} i={i} x={x} width={width} active={page === i} breathe={breathe} onRestore={restore} />
           ))}
         </Animated.ScrollView>
 
@@ -265,6 +272,7 @@ function PageView({
   width,
   active,
   breathe,
+  onRestore,
 }: {
   p: Page;
   i: number;
@@ -272,6 +280,7 @@ function PageView({
   width: number;
   active: boolean;
   breathe: SharedValue<number>;
+  onRestore: () => void;
 }) {
   // The picture drifts slower than the page and the words a touch faster: a little depth.
   const pic = useAnimatedStyle(() => {
@@ -334,6 +343,19 @@ function PageView({
           <Reveal active={active} delay={after + 120} style={styles.source}>
             <Feather name="book-open" size={12} color={colors.muted} />
             <Text style={styles.sourceText}>{p.source}</Text>
+          </Reveal>
+        ) : null}
+        {p.restore ? (
+          <Reveal active={active} delay={after + 160}>
+            <Pressable
+              onPress={onRestore}
+              style={({ pressed }) => [styles.restore, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityHint="Choose a hani backup file to bring your stash over"
+            >
+              <Feather name="download" size={14} color={colors.inkSoft} />
+              <Text style={styles.restoreText}>I have a backup</Text>
+            </Pressable>
           </Reveal>
         ) : null}
       </Animated.View>
@@ -466,6 +488,18 @@ const styles = themed((colors) =>
     title: { fontFamily: fonts.display, fontSize: 30, lineHeight: 36, color: colors.ink },
     body: { fontFamily: fonts.regular, fontSize: 15.5, lineHeight: 23, color: colors.inkSoft, marginTop: 10 },
     source: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
+    restore: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 7,
+      height: 40,
+      paddingHorizontal: 16,
+      borderRadius: 20,
+      backgroundColor: colors.chip,
+      marginTop: 16,
+    },
+    restoreText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.inkSoft },
     sourceText: { flexShrink: 1, fontFamily: fonts.medium, fontSize: 12, color: colors.muted },
 
     bottom: {

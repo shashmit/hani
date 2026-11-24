@@ -1,6 +1,6 @@
 [package]
 name = "hani"
-version = "1.0.0"
+version = "1.1.0"
 description = "hani desktop"
 authors = []
 license = ""
@@ -24,3 +24,5 @@ log = "0.4"
 tauri = { version = "2.12.7", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-store = "2.5.1"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"

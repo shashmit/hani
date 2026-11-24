@@ -13,6 +13,10 @@ hani is a stack of full-screen blocks. Pull the dock to move between them, or ho
 
 The phone app follows your system light or dark setting.
 
+## Backups
+
+Settings → Back up saves everything (money, tasks, bookmarks, notes, block order and theme) to one `hani-backup-<date>.json` file. Restore it from Settings, from the welcome tour on the phone ("I have a backup"), or from the welcome prompt on the Mac. The same file works on both, so it is also how you move your stash between devices. Restoring replaces what is on the device.
+
 ## Download
 
 Get the latest build from the [Releases page](https://github.com/shashmit/hani/releases/latest).

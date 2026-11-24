@@ -7,9 +7,12 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { BLOCKS, type BlockDef } from '@/blocks';
 import { EntriesPanel } from '@/components/EntriesPanel';
 import { DockedPanel, SidePanelHost } from '@/components/SidePanel';
-import { useDialog } from '@/lib/ask';
+import { ask, useDialog } from '@/lib/ask';
+import { currentSummary, isEmpty, whenLoaded } from '@/lib/backup';
+import { importBackup } from '@/lib/backupActions';
 import { BlockActive, BlockSpace } from '@/lib/blockSpace';
 import { orderBlocks, useLayout } from '@/store/layout';
+import { usePrefs } from '@/store/prefs';
 import { colors, fonts } from '@/theme';
 
 import { BACKDROP, DRAG_REGION, FRAME_PAD, IS_MAC, SHEET_RADIUS } from './frame';
@@ -50,6 +53,25 @@ export function DesktopHome() {
   const block = blocks[index] ?? blocks[0];
 
   const go = useCallback((i: number) => setIndex(Math.min(last, Math.max(0, i))), [last]);
+
+  // First launch with nothing saved: offer to bring a stash over from a backup. This is
+  // the desktop's whole welcome (the phone has its tour), so it is only asked once.
+  useEffect(() => {
+    let live = true;
+    whenLoaded().then(() => {
+      const { onboarded, setOnboarded } = usePrefs.getState();
+      if (!live || onboarded) return;
+      setOnboarded(true);
+      if (!isEmpty(currentSummary())) return;
+      ask('Welcome to hani', 'Everything you add stays on this computer. Moving in from another device? Bring your stash over from a backup file. You can also do this later in Settings.', [
+        { text: 'Restore a backup', onPress: () => void importBackup() },
+        { text: 'Start fresh', style: 'cancel' },
+      ]);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // Only home itself answers keys, with no form or dialog on top.
   const homeActive = useCallback(() => pathname === '/' && !useDialog.getState().dialog, [pathname]);

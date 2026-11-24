@@ -290,24 +290,7 @@ export function EntriesPanel() {
             </View>
             <Squirrel size={54} hopSignal={`${period}-${placeId}-${category}`} />
           </View>
-          {plan && (
-            <>
-              <Text style={styles.planLine}>{planLine}</Text>
-              <View style={styles.heroStats}>
-                <HeroStat label="A day, so far" value={money(plan.average)} />
-                {plan.current && monthlyBudget > 0 ? (
-                  <HeroStat label="Heading for" value={money(plan.projected)} warn={plan.projected > monthlyBudget} />
-                ) : (
-                  <HeroStat label="Budget" value={monthlyBudget > 0 ? money(monthlyBudget) : 'Not set'} />
-                )}
-                <HeroStat
-                  label={monthlyBudget > 0 && plan.left < 0 ? 'Over' : 'Left'}
-                  value={monthlyBudget > 0 ? money(Math.abs(plan.left)) : '–'}
-                  warn={monthlyBudget > 0 && plan.left < 0}
-                />
-              </View>
-            </>
-          )}
+          {plan && <Text style={styles.planLine}>{planLine}</Text>}
           {/* Glide a finger along it to read any day (or month). */}
           <View style={{ marginTop: 16 }}>
             <ScrubChart key={`${period}-${ym.y}-${ym.m}`} points={series.points} start={series.start} axis={series.axis} money={money} />
@@ -611,19 +594,6 @@ function MonthCalendar({
   );
 }
 
-function HeroStat({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
-  return (
-    <View style={styles.heroStat}>
-      <Text style={[styles.heroStatValue, warn && styles.heroStatWarn]} numberOfLines={1} adjustsFontSizeToFit>
-        {value}
-      </Text>
-      <Text style={styles.heroStatLabel} numberOfLines={1}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 /** A compact control: opens a drawer; when something is picked it fills in and gets an x to clear. */
 function Pill({
   icon,
@@ -784,17 +754,6 @@ const styles = themed((colors) =>
   pillText: { flexShrink: 1, fontFamily: fonts.semibold, fontSize: 13.5, color: colors.ink },
   pillTextOn: { color: colors.cream },
   planLine: { fontFamily: fonts.medium, fontSize: 13.5, lineHeight: 19, color: colors.cream, opacity: 0.85, marginTop: 8 },
-  heroStats: {
-    flexDirection: 'row',
-    marginTop: 12,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,244,223,0.12)',
-  },
-  heroStat: { flex: 1, alignItems: 'center', paddingHorizontal: 6 },
-  heroStatValue: { fontFamily: fonts.displaySoft, fontSize: 16, color: colors.cream },
-  heroStatWarn: { color: '#FFB4A6' },
-  heroStatLabel: { fontFamily: fonts.medium, fontSize: 11.5, color: colors.cream, opacity: 0.7, marginTop: 1 },
   optionLead: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: 20, paddingTop: 0, paddingBottom: 32 },

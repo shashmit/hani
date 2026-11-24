@@ -14,6 +14,7 @@ import { plural, SORTS, VIEWS } from '@/components/bookmarks/meta';
 import { Squirrel } from '@/components/mascot/Squirrel';
 import { type IconName } from '@/components/ui/BottomDrawer';
 import { ask } from '@/lib/ask';
+import { exportBackup, importBackup } from '@/lib/backupActions';
 import { CURRENCIES, dateKey, formatMoney } from '@/lib/format';
 import { isLive, useBookmarks } from '@/store/bookmarks';
 import { useExpenses } from '@/store/expenses';
@@ -217,6 +218,22 @@ export default function Settings() {
                 ))}
               </View>
             </Group>
+            <Line />
+            <Row
+              icon="upload"
+              label="Back up"
+              meta="Everything in one file, to keep safe or move to another device"
+              action="Export"
+              onPress={exportBackup}
+            />
+            <Line />
+            <Row
+              icon="download"
+              label="Restore a backup"
+              meta={`Replaces what is on this ${onWeb ? 'computer' : 'phone'} with a backup file`}
+              action="Choose file"
+              onPress={() => void importBackup()}
+            />
             {!onWeb && (
               <>
                 <Line />
