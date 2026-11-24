@@ -12,8 +12,8 @@ export const TOP_CLEAR = 52;
 export const LIGHTS_W = 92;
 
 export const SIDEBAR_W = 264;
-/** The sidebar folded down to icons. */
-export const RAIL_W = 76;
+/** The sidebar folded down to icons. Wide enough to hold the macOS window buttons with room either side. */
+export const RAIL_W = 88;
 /** Bark showing around the workspace. */
 export const FRAME_PAD = 10;
 export const SHEET_RADIUS = 26;
