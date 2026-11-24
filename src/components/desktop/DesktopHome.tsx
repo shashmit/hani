@@ -11,15 +11,13 @@ import { ask, useDialog } from '@/lib/ask';
 import { currentSummary, isEmpty, whenLoaded } from '@/lib/backup';
 import { importBackup } from '@/lib/backupActions';
 import { BlockActive, BlockSpace } from '@/lib/blockSpace';
+import { useDesk } from '@/store/desk';
 import { orderBlocks, useLayout } from '@/store/layout';
 import { usePrefs } from '@/store/prefs';
 import { colors, fonts } from '@/theme';
 
-import { BACKDROP, DRAG_REGION, FRAME_PAD, IS_MAC, SHEET_RADIUS } from './frame';
+import { ADD_KEY, BACKDROP, DRAG_REGION, FRAME_PAD, IS_MAC, SHEET_RADIUS } from './frame';
 import { Sidebar } from './Sidebar';
-
-/** Keyboard shortcut letter for each block's add button. */
-const ADD_KEY: Record<string, string> = { money: 'E', tasks: 'T', bookmarks: 'L', notes: 'N' };
 
 /** ⌘E new expense, ⌘T new task, ⌘L new link, ⌘N new note, ⌘B budget, ⌘, settings. */
 const SHORTCUTS: Record<string, Href> = {
@@ -43,16 +41,18 @@ const SPACE = { bottom: 24 };
  */
 export function DesktopHome() {
   const pathname = usePathname();
-  const [index, setIndex] = useState(0);
   // Same block order the user set on this device.
   const order = useLayout((st) => st.order);
   const rail = useLayout((st) => st.railOnly);
   const setRail = useLayout((st) => st.setRailOnly);
   const blocks = useMemo(() => orderBlocks(BLOCKS, order), [order]);
   const last = blocks.length - 1;
-  const block = blocks[index] ?? blocks[0];
+  const current = useDesk((st) => st.block);
+  const setBlock = useDesk((st) => st.setBlock);
+  const index = Math.max(0, blocks.findIndex((b) => b.key === current));
+  const block = blocks[index];
 
-  const go = useCallback((i: number) => setIndex(Math.min(last, Math.max(0, i))), [last]);
+  const go = useCallback((i: number) => setBlock(blocks[Math.min(last, Math.max(0, i))].key), [blocks, last, setBlock]);
 
   // First launch with nothing saved: offer to bring a stash over from a backup. This is
   // the desktop's whole welcome (the phone has its tour), so it is only asked once.

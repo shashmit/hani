@@ -15,6 +15,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DesktopPage } from '@/components/desktop/DesktopPage';
+import { useIsDesktop } from '@/lib/useDesktop';
 import { ask } from '@/lib/ask';
 import { relativeDay } from '@/lib/format';
 import { useSettledFocus } from '@/lib/useSettledFocus';
@@ -27,6 +28,7 @@ import { colors, fonts, themed } from '@/theme';
  */
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const desktop = useIsDesktop();
   const { notes, folders, updateNote, removeNote } = useNotes();
   const note = notes.find((n) => n.id === id);
 
@@ -66,7 +68,7 @@ export default function NoteScreen() {
   const allTags = useMemo(() => tagCounts(notes).map(([t]) => t), [notes]);
   if (!note) {
     return (
-      <DesktopPage ground={colors.groundNotes}>
+      <DesktopPage ground={colors.groundNotes} block="notes" back="Notes">
         <SafeAreaView style={styles.root}>
           <Text style={styles.missing}>This note is gone.</Text>
         </SafeAreaView>
@@ -103,13 +105,22 @@ export default function NoteScreen() {
     ]);
 
   return (
-    <DesktopPage ground={colors.groundNotes}>
+    <DesktopPage
+      ground={colors.groundNotes}
+      block="notes"
+      back="Notes"
+      title={title || 'Untitled'}
+      note={path.map((f) => f.name).join(' / ') || undefined}
+    >
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <View style={{ flex: 1 }}>
         <View style={styles.bar}>
-          <Pressable onPress={() => router.back()} style={styles.round} hitSlop={8} accessibilityLabel="Back to notes">
-            <Feather name="chevron-left" size={20} color={colors.ink} />
-          </Pressable>
+          {/* On desktop the window's title strip already leads back. */}
+          {!desktop && (
+            <Pressable onPress={() => router.back()} style={styles.round} hitSlop={8} accessibilityLabel="Back to notes">
+              <Feather name="chevron-left" size={20} color={colors.ink} />
+            </Pressable>
+          )}
           <Pressable
             onPress={() => setPicking((p) => !p)}
             style={styles.path}

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -32,6 +32,7 @@ export function Sidebar({
   rail,
   onToggleRail,
   addKey,
+  settings = false,
 }: {
   blocks: BlockDef[];
   index: number;
@@ -39,8 +40,13 @@ export function Sidebar({
   rail: boolean;
   onToggleRail: () => void;
   addKey: Record<string, string>;
+  /** Settings is open: its row is the lit one, and no block is. */
+  settings?: boolean;
 }) {
   const block = blocks[index] ?? blocks[0];
+  const openSettings = () => {
+    if (!settings) router.push('/settings');
+  };
   const counts = useCounts();
 
   if (rail) {
@@ -61,17 +67,17 @@ export function Sidebar({
             <Pressable
               key={b.key}
               onPress={() => onSelect(i)}
-              style={({ hovered }: Hover) => [styles.railItem, hovered && styles.hover, i === index && styles.railOn]}
+              style={({ hovered }: Hover) => [styles.railItem, hovered && styles.hover, i === index && !settings && styles.railOn]}
               accessibilityRole="tab"
-              aria-selected={i === index}
+              aria-selected={i === index && !settings}
               accessibilityLabel={b.title}
             >
-              <Feather name={b.icon} size={19} color={i === index ? colors.onHoney : ON_BARK.soft} />
+              <Feather name={b.icon} size={19} color={i === index && !settings ? colors.onHoney : ON_BARK.soft} />
             </Pressable>
           ))}
         </View>
         <View style={styles.railFoot}>
-          <IconButton icon="settings" label="Settings" onPress={() => router.push('/settings')} />
+          <IconButton icon="settings" label="Settings" on={settings} onPress={openSettings} />
           <IconButton icon="sidebar" label="Show sidebar" onPress={onToggleRail} />
         </View>
       </View>
@@ -108,7 +114,7 @@ export function Sidebar({
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.nav} showsVerticalScrollIndicator={false}>
         <Text style={styles.label}>Blocks</Text>
         {blocks.map((b, i) => {
-          const on = i === index;
+          const on = i === index && !settings;
           return (
             <View key={b.key}>
               <Pressable
@@ -143,14 +149,15 @@ export function Sidebar({
 
       <View style={styles.foot}>
         <Pressable
-          onPress={() => router.push('/settings')}
-          style={({ hovered }: Hover) => [styles.row, hovered && styles.hover]}
+          onPress={openSettings}
+          style={({ hovered }: Hover) => [styles.row, hovered && !settings && styles.hover, settings && styles.rowOn]}
           accessibilityRole="button"
+          aria-current={settings || undefined}
           accessibilityLabel="Settings"
         >
-          <Feather name="settings" size={17} color={ON_BARK.soft} />
-          <Text style={styles.rowText}>Settings</Text>
-          <Text style={styles.count}>{`${MOD},`}</Text>
+          <Feather name="settings" size={17} color={settings ? colors.onHoney : ON_BARK.soft} />
+          <Text style={[styles.rowText, settings && styles.rowTextOn]}>Settings</Text>
+          <Text style={[styles.count, settings && styles.countOn]}>{`${MOD},`}</Text>
         </Pressable>
       </View>
     </View>
@@ -297,6 +304,9 @@ function BookmarkSubs() {
 
 function NoteSubs() {
   const notes = useNotes((s) => s.notes);
+  // The note that is open in the editor, if one is.
+  const pathname = usePathname();
+  const openId = pathname.startsWith('/note/') ? decodeURIComponent(pathname.slice(6)) : null;
   const recent = useMemo(
     () => [...notes].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt - a.updatedAt).slice(0, 6),
     [notes],
@@ -309,7 +319,14 @@ function NoteSubs() {
           key={n.id}
           icon={n.pinned ? 'bookmark' : 'file-text'}
           label={n.title || 'Untitled'}
-          onPress={() => router.push({ pathname: '/note/[id]', params: { id: n.id } })}
+          on={n.id === openId}
+          onPress={() => {
+            if (n.id === openId) return;
+            // From one note to the next: swap, so Back still leads to the notes list.
+            const to = { pathname: '/note/[id]' as const, params: { id: n.id } };
+            if (openId) router.replace(to);
+            else router.push(to);
+          }}
         />
       ))}
     </>
@@ -369,15 +386,15 @@ function Sub({
   );
 }
 
-function IconButton({ icon, label, onPress }: { icon: Icon; label: string; onPress: () => void }) {
+function IconButton({ icon, label, on, onPress }: { icon: Icon; label: string; on?: boolean; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ hovered }: Hover) => [styles.iconBtn, hovered && styles.hover]}
+      style={({ hovered }: Hover) => [styles.iconBtn, hovered && !on && styles.hover, on && styles.railOn]}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Feather name={icon} size={17} color={ON_BARK.soft} />
+      <Feather name={icon} size={17} color={on ? colors.onHoney : ON_BARK.soft} />
     </Pressable>
   );
 }

@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DesktopPage } from '@/components/desktop/DesktopPage';
@@ -16,6 +16,7 @@ import { type IconName } from '@/components/ui/BottomDrawer';
 import { ask } from '@/lib/ask';
 import { exportBackup, importBackup } from '@/lib/backupActions';
 import { CURRENCIES, dateKey, formatMoney } from '@/lib/format';
+import { useIsDesktop } from '@/lib/useDesktop';
 import { isLive, useBookmarks } from '@/store/bookmarks';
 import { useExpenses } from '@/store/expenses';
 import { orderBlocks, useLayout } from '@/store/layout';
@@ -29,12 +30,13 @@ const success = () => Haptics.notificationAsync(Haptics.NotificationFeedbackType
 
 type SectionKey = 'general' | 'money' | 'tasks' | 'bookmarks' | 'notes';
 
-const SECTIONS: { key: SectionKey; title: string; icon: IconName; color: string }[] = [
-  { key: 'general', title: 'General', icon: 'sliders', color: '#1F4A36' },
-  { key: 'money', title: 'Money', icon: 'credit-card', color: '#E08A32' },
-  { key: 'tasks', title: 'Tasks', icon: 'check-circle', color: '#5E9A4E' },
-  { key: 'bookmarks', title: 'Bookmarks', icon: 'bookmark', color: '#3F7C9E' },
-  { key: 'notes', title: 'Notes', icon: 'edit-3', color: '#E9A52C' },
+/** `blurb` is the line under a section's title on desktop, where each section is its own pane. */
+const SECTIONS: { key: SectionKey; title: string; blurb: string; icon: IconName; color: string }[] = [
+  { key: 'general', title: 'General', blurb: 'The order of your blocks, and backups', icon: 'sliders', color: '#1F4A36' },
+  { key: 'money', title: 'Money', blurb: 'Currency, budget and places', icon: 'credit-card', color: '#E08A32' },
+  { key: 'tasks', title: 'Tasks', blurb: 'Tidy up what is left over and what is done', icon: 'check-circle', color: '#5E9A4E' },
+  { key: 'bookmarks', title: 'Bookmarks', blurb: 'Import links, choose how they show, empty the Trash', icon: 'bookmark', color: '#3F7C9E' },
+  { key: 'notes', title: 'Notes', blurb: 'Folders in the notes tree', icon: 'edit-3', color: '#E9A52C' },
 ];
 
 const THEMES: { value: ThemePref; label: string }[] = [
@@ -50,10 +52,14 @@ const DARK_SWATCH = ['#18130F', '#2A211A', '#F3E9D8'] as const;
  * Settings, opened by tapping Hazel on the dock. A strip of section tabs follows your
  * scroll (and jumps when tapped); each section opens with its own numbers, then its
  * options. Things you navigate to carry an arrow; things that act carry a button.
+ *
+ * On desktop it is laid out like a preferences window instead: the sections listed down
+ * the left, and one section at a time beside them.
  */
 const onWeb = Platform.OS === 'web';
 
 export default function Settings() {
+  const desktop = useIsDesktop();
   const { theme, setTheme } = usePrefs();
   const { order, setOrder } = useLayout();
   const { currency, setCurrency, monthlyBudget, places, expenses } = useExpenses();
@@ -100,6 +106,24 @@ export default function Settings() {
 
   const section = (key: SectionKey, i: number, stats: ReactNode, children: ReactNode) => {
     const s = SECTIONS.find((x) => x.key === key)!;
+    if (desktop) {
+      if (key !== active) return null;
+      return (
+        <Animated.View key={key} entering={FadeIn.duration(160)} style={styles.pane}>
+          <View style={styles.paneHead}>
+            <View style={[styles.paneBadge, { backgroundColor: s.color }]}>
+              <Feather name={s.icon} size={20} color="#FFF4DF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.paneTitle}>{s.title}</Text>
+              <Text style={styles.subtitle}>{s.blurb}</Text>
+            </View>
+          </View>
+          {stats ? <View style={[styles.stats, styles.paneStats, { backgroundColor: tint(s.color) }]}>{stats}</View> : null}
+          <View style={styles.card}>{children}</View>
+        </Animated.View>
+      );
+    }
     return (
       <Animated.View
         entering={FadeInDown.delay(60 + i * 70).springify().damping(18)}
@@ -122,53 +146,8 @@ export default function Settings() {
     );
   };
 
-  return (
-    <DesktopPage>
-    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        {!onWeb && (
-          <Pressable onPress={() => router.back()} style={styles.round} hitSlop={8} accessibilityLabel="Back">
-            <Feather name="chevron-left" size={20} color={colors.ink} />
-          </Pressable>
-        )}
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>Settings</Text>
-          <Text style={styles.subtitle}>Everything stays on this {onWeb ? 'computer' : 'phone'}</Text>
-        </View>
-        <Squirrel size={54} acorn hopSignal={active} />
-      </View>
-
-      <ScrollView
-        ref={tabs}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabs}
-        contentContainerStyle={styles.tabsContent}
-      >
-        {SECTIONS.map((s) => {
-          const on = active === s.key;
-          return (
-            <Pressable
-              key={s.key}
-              onPress={() => jump(s.key)}
-              style={[styles.tab, on && { backgroundColor: s.color }]}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
-            >
-              <Feather name={s.icon} size={14} color={on ? '#FFF4DF' : colors.inkSoft} />
-              <Text style={[styles.tabText, on && { color: '#FFF4DF' }]}>{s.title}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      <ScrollView
-        ref={scroller}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={48}
-        onScroll={(e) => onScrollY(e.nativeEvent.contentOffset.y)}
-      >
+  const sections = (
+    <>
         {section(
           'general',
           0,
@@ -415,11 +394,99 @@ export default function Settings() {
             onPress={() => openFolders.forEach((id) => toggleFolder(id, false))}
           />,
         )}
+    </>
+  );
+
+  if (desktop) {
+    return (
+      <DesktopPage settings title="Settings" note={SECTIONS.find((x) => x.key === active)!.title} maxWidth={1040}>
+        <View style={styles.desk}>
+          <View style={styles.deskNav}>
+            <Text style={styles.title}>Settings</Text>
+            <Text style={styles.subtitle}>Everything stays on this computer</Text>
+            <View style={styles.deskList} accessibilityRole="tablist">
+              {SECTIONS.map((s) => {
+                const on = active === s.key;
+                return (
+                  <Pressable
+                    key={s.key}
+                    onPress={() => setActive(s.key)}
+                    style={({ hovered }: { hovered?: boolean }) => [styles.deskRow, hovered && !on && styles.deskRowHover, on && styles.deskRowOn]}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: on }}
+                  >
+                    <View style={[styles.sectionBadge, { backgroundColor: s.color }]}>
+                      <Feather name={s.icon} size={14} color="#FFF4DF" />
+                    </View>
+                    <Text style={[styles.deskRowText, on && styles.deskRowTextOn]}>{s.title}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <View style={styles.deskFoot}>
+              <Squirrel size={58} acorn hopSignal={active} />
+              <Text style={styles.deskFootText}>{'No account, no cloud.\nMade with acorns.'}</Text>
+            </View>
+          </View>
+          <ScrollView key={active} style={{ flex: 1 }} contentContainerStyle={styles.deskContent} showsVerticalScrollIndicator={false}>
+            {sections}
+          </ScrollView>
+        </View>
+      </DesktopPage>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <View style={styles.header}>
+        {!onWeb && (
+          <Pressable onPress={() => router.back()} style={styles.round} hitSlop={8} accessibilityLabel="Back">
+            <Feather name="chevron-left" size={20} color={colors.ink} />
+          </Pressable>
+        )}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.subtitle}>Everything stays on this {onWeb ? 'computer' : 'phone'}</Text>
+        </View>
+        <Squirrel size={54} acorn hopSignal={active} />
+      </View>
+
+      <ScrollView
+        ref={tabs}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabs}
+        contentContainerStyle={styles.tabsContent}
+      >
+        {SECTIONS.map((s) => {
+          const on = active === s.key;
+          return (
+            <Pressable
+              key={s.key}
+              onPress={() => jump(s.key)}
+              style={[styles.tab, on && { backgroundColor: s.color }]}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: on }}
+            >
+              <Feather name={s.icon} size={14} color={on ? '#FFF4DF' : colors.inkSoft} />
+              <Text style={[styles.tabText, on && { color: '#FFF4DF' }]}>{s.title}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <ScrollView
+        ref={scroller}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={48}
+        onScroll={(e) => onScrollY(e.nativeEvent.contentOffset.y)}
+      >
+        {sections}
 
         <Text style={styles.footer}>No account, no cloud. Made with acorns.</Text>
       </ScrollView>
     </SafeAreaView>
-    </DesktopPage>
   );
 }
 
@@ -670,6 +737,32 @@ const styles = themed((colors) =>
     actionText: { fontFamily: fonts.semibold, fontSize: 13.5, color: colors.onHoney },
     actionTextDanger: { color: colors.danger },
     actionTextOff: { color: colors.faint },
+
+    // Desktop: sections down the left, one pane beside them.
+    desk: { flex: 1, flexDirection: 'row', gap: 44, paddingTop: 18 },
+    deskNav: { width: 216, paddingBottom: 14 },
+    deskList: { gap: 3, marginTop: 22, flex: 1 },
+    deskRow: {
+      height: 44,
+      borderRadius: 15,
+      borderCurve: 'continuous',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 11,
+      paddingHorizontal: 8,
+    },
+    deskRowHover: { backgroundColor: colors.chip },
+    deskRowOn: { backgroundColor: colors.surface },
+    deskRowText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.inkSoft },
+    deskRowTextOn: { color: colors.ink },
+    deskFoot: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    deskFootText: { flex: 1, fontFamily: fonts.medium, fontSize: 12, lineHeight: 17, color: colors.muted },
+    deskContent: { paddingBottom: 40, maxWidth: 720, width: '100%' },
+    pane: { gap: 14 },
+    paneHead: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 4, minHeight: 64 },
+    paneBadge: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+    paneTitle: { fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.ink },
+    paneStats: { marginBottom: 0, paddingVertical: 18, borderRadius: 26 },
 
     footer: { fontFamily: fonts.medium, fontSize: 12.5, color: colors.muted, textAlign: 'center' },
   }),

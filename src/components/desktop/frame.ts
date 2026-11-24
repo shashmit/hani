@@ -18,8 +18,11 @@ export const RAIL_W = 76;
 export const FRAME_PAD = 10;
 export const SHEET_RADIUS = 26;
 
-/** Widest a full-page route (note editor, settings) gets. */
-export const PAGE_MAX = 860;
+/** Widest the content of a full-page route (e.g. the note editor) runs inside the workspace. */
+export const PAGE_MAX = 760;
+
+/** Keyboard shortcut letter for each block's add button. */
+export const ADD_KEY: Record<string, string> = { money: 'E', tasks: 'T', bookmarks: 'L', notes: 'N' };
 
 export const IS_MAC = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
 export const MOD = IS_MAC ? '⌘' : 'Ctrl ';
