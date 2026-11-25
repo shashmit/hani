@@ -35,7 +35,7 @@ import { Guide } from '@/components/Guide';
 import { useSidePanelOptional } from '@/components/SidePanel';
 import { BlockActive, BlockSpace } from '@/lib/blockSpace';
 import { MotionClock } from '@/lib/motion';
-import { colors, fonts, isDark, themed } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 /**
  * Vertical stack of full-screen "sheets" on a black backdrop, joined by a dock.
@@ -60,9 +60,6 @@ import { colors, fonts, isDark, themed } from '@/theme';
  *  - on release, a spring seeded with the finger's velocity finishes the move.
  */
 
-const BACKDROP = '#2A1D14';
-/** Bark behind the sheets and on the dock; a touch lighter at night so the dock still lifts off the dark grounds. */
-const backdrop = () => (isDark() ? '#30241B' : BACKDROP);
 /** Height of the dock, and of the gap that opens between sheets. */
 const DOCK_H = 56;
 const PILL_W = 204;
@@ -808,12 +805,13 @@ function MenuRow({
   });
   const gesture = useCompetingGestures(drag, tap);
 
+  const liftColor = colors.backdropLift;
   const style = useAnimatedStyle(() => {
     const up = dragging.get();
     return {
       top: top.get(),
       zIndex: up ? 2 : 0,
-      backgroundColor: up ? '#3A2A1F' : here ? 'rgba(255,244,223,0.09)' : 'rgba(255,244,223,0)',
+      backgroundColor: up ? liftColor : here ? 'rgba(255,244,223,0.09)' : 'rgba(255,244,223,0)',
       boxShadow: up ? '0px 14px 28px -8px rgba(0,0,0,0.55)' : '0px 0px 0px 0px rgba(0,0,0,0)',
       transform: [{ scale: withSpring(up ? 1.035 : pressed.get() ? 0.98 : 1, ROW_SPRING) }],
     };
@@ -865,7 +863,7 @@ function MenuRow({
 
 const styles = themed((colors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: backdrop() },
+  root: { flex: 1, backgroundColor: colors.backdrop },
   sheet: {
     position: 'absolute',
     left: 0,
@@ -881,10 +879,10 @@ const styles = themed((colors) =>
     width: PILL_W,
     height: DOCK_H,
     borderRadius: DOCK_H / 2,
-    backgroundColor: backdrop(),
+    backgroundColor: colors.backdrop,
     boxShadow: '0px 12px 24px -8px rgba(42, 29, 20, 0.45)',
   },
-  middle: { position: 'absolute', left: 0, top: 0, height: DOCK_H, backgroundColor: backdrop() },
+  middle: { position: 'absolute', left: 0, top: 0, height: DOCK_H, backgroundColor: colors.backdrop },
   cap: {
     position: 'absolute',
     left: 0,
@@ -892,7 +890,7 @@ const styles = themed((colors) =>
     width: DOCK_H,
     height: DOCK_H,
     borderRadius: DOCK_H / 2,
-    backgroundColor: backdrop(),
+    backgroundColor: colors.backdrop,
   },
   labels: {
     position: 'absolute',
@@ -908,7 +906,7 @@ const styles = themed((colors) =>
     alignItems: 'center',
     gap: 2,
   },
-  dockText: { fontFamily: fonts.displaySoft, fontSize: 17.5, color: '#FFF4DF' },
+  dockText: { fontFamily: fonts.displaySoft, fontSize: 17.5, color: colors.cream },
   handle: {
     position: 'absolute',
     width: 64,
@@ -953,7 +951,7 @@ const styles = themed((colors) =>
     position: 'absolute',
     left: 20,
     right: 20,
-    backgroundColor: backdrop(),
+    backgroundColor: colors.backdrop,
     borderRadius: 30,
     borderCurve: 'continuous',
     padding: 10,

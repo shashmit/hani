@@ -5,7 +5,7 @@ import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { fonts } from '@/theme';
+import { fonts, themed } from '@/theme';
 
 export type ScrubPoint = {
   key: string;
@@ -154,9 +154,8 @@ export function ScrubChart({
 }
 
 const CREAM = '#FFF4DF';
-const HONEY = '#F6B845';
 
-const styles = StyleSheet.create({
+const styles = themed((colors) => StyleSheet.create({
   readout: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 6 },
   readLabel: { fontFamily: fonts.semibold, fontSize: 13.5, color: CREAM },
   readValue: { flexShrink: 1, fontFamily: fonts.medium, fontSize: 13, color: CREAM, opacity: 0.85 },
@@ -168,14 +167,14 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     borderRadius: 10,
-    backgroundColor: 'rgba(246,184,69,0.28)',
+    backgroundColor: `${colors.honey}47`,
   },
   bars: { flexDirection: 'row', alignItems: 'flex-end', height: H },
   slot: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
   bar: { borderRadius: 4 },
   barFull: { backgroundColor: CREAM, opacity: 0.75 },
   barEmpty: { backgroundColor: CREAM, opacity: 0.28 },
-  barOn: { backgroundColor: HONEY, opacity: 1 },
+  barOn: { backgroundColor: colors.honey, opacity: 1 },
   axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   axisText: { fontFamily: fonts.medium, fontSize: 11.5, color: CREAM, opacity: 0.6 },
-});
+}));

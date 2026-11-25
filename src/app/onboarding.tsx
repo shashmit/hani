@@ -38,7 +38,7 @@ import {
 } from '@/components/onboarding/Scenes';
 import { importBackup } from '@/lib/backupActions';
 import { usePrefs } from '@/store/prefs';
-import { colors, fonts, isDark, themed, type Palette } from '@/theme';
+import { colors, fonts, themed, type Palette } from '@/theme';
 
 type Page = {
   key: string;
@@ -325,7 +325,7 @@ function PageView({
         ) : null}
         {p.kicker ? (
           <Reveal active={active} delay={90} style={styles.kicker}>
-            <Feather name="zap" size={12} color={isDark() ? '#9FCFA4' : colors.forest} />
+            <Feather name="zap" size={12} color={colors.forestInk} />
             <Text style={styles.kickerText}>{p.kicker} · the science</Text>
           </Reveal>
         ) : null}
@@ -483,7 +483,7 @@ const styles = themed((colors) =>
       backgroundColor: colors.sageSoft,
       marginBottom: 12,
     },
-    kickerText: { fontFamily: fonts.semibold, fontSize: 12, color: isDark() ? '#9FCFA4' : colors.forest, letterSpacing: 0.2 },
+    kickerText: { fontFamily: fonts.semibold, fontSize: 12, color: colors.forestInk, letterSpacing: 0.2 },
     titleRow: { flexDirection: 'row', flexWrap: 'wrap' },
     title: { fontFamily: fonts.display, fontSize: 30, lineHeight: 36, color: colors.ink },
     body: { fontFamily: fonts.regular, fontSize: 15.5, lineHeight: 23, color: colors.inkSoft, marginTop: 10 },

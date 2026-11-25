@@ -14,9 +14,9 @@ import { BlockActive, BlockSpace } from '@/lib/blockSpace';
 import { useDesk } from '@/store/desk';
 import { orderBlocks, useLayout } from '@/store/layout';
 import { usePrefs } from '@/store/prefs';
-import { colors, fonts } from '@/theme';
+import { fonts, themed } from '@/theme';
 
-import { ADD_KEY, BACKDROP, DRAG_REGION, FRAME_PAD, IS_MAC, SHEET_RADIUS } from './frame';
+import { ADD_KEY, DRAG_REGION, FRAME_PAD, IS_MAC, SHEET_RADIUS } from './frame';
 import { Sidebar } from './Sidebar';
 
 /** ⌘E new expense, ⌘T new task, ⌘L new link, ⌘N new note, ⌘B budget, ⌘, settings. */
@@ -193,8 +193,8 @@ function MoneyDesk() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, flexDirection: 'row', backgroundColor: BACKDROP },
+const styles = themed((colors) => StyleSheet.create({
+  root: { flex: 1, flexDirection: 'row', backgroundColor: colors.backdrop },
   work: {
     flex: 1,
     marginVertical: FRAME_PAD,
@@ -212,5 +212,5 @@ const styles = StyleSheet.create({
   column: { flex: 1, width: '100%' },
   fill: { flex: 1, minWidth: 0 },
   split: { flex: 1, flexDirection: 'row', gap: 32 },
-});
+}));
 

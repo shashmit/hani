@@ -11,7 +11,7 @@ hani is a stack of full-screen blocks. Pull the dock to move between them, or ho
 - **Bookmarks**: collections that nest, tags, favourites, trash, and import from a browser bookmarks file.
 - **Notes**: notes in folders, with tags.
 
-The phone app follows your system light or dark setting.
+The phone app follows your system light or dark setting. Settings → Colors has six themes: Woodland, Sagebrush, Rosehip, Heather, Tidepool and Clay, each with a light and a dark version.
 
 ## Backups
 

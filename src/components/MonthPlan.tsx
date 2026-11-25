@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import type { Expense } from '@/store/expenses';
-import { colors, fonts, isDark, themed } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const tick = () => Haptics.selectionAsync().catch(() => {});
@@ -254,7 +254,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: 'go
   return (
     <View style={styles.stat}>
       <Text
-        style={[styles.statValue, tone === 'bad' && { color: colors.danger }, tone === 'good' && { color: isDark() ? '#9FCFA4' : colors.forest }]}
+        style={[styles.statValue, tone === 'bad' && { color: colors.danger }, tone === 'good' && { color: colors.forestInk }]}
         numberOfLines={1}
         adjustsFontSizeToFit
       >

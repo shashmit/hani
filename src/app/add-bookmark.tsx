@@ -171,7 +171,7 @@ export default function AddBookmark() {
           <View style={styles.previewBody}>
             {loading ? (
               <View style={styles.loading}>
-                <ActivityIndicator size="small" color={colors.forest} />
+                <ActivityIndicator size="small" color={colors.forestInk} />
                 <Text style={styles.loadingText}>Hazel is fetching the page…</Text>
               </View>
             ) : (
@@ -220,7 +220,7 @@ export default function AddBookmark() {
           {tags.map((t) => (
             <Pressable key={t} onPress={() => setTags(tags.filter((x) => x !== t))} style={styles.tag}>
               <Text style={styles.tagText}>#{t}</Text>
-              <Feather name="x" size={12} color={colors.forest} />
+              <Feather name="x" size={12} color={colors.forestInk} />
             </Pressable>
           ))}
           <TextInput

@@ -202,7 +202,7 @@ export default function NoteScreen() {
                 accessibilityLabel={`Tag ${t}, tap to remove`}
               >
                 <Text style={styles.tagText}>#{t}</Text>
-                <Feather name="x" size={12} color={colors.forest} />
+                <Feather name="x" size={12} color={colors.forestInk} />
               </Pressable>
             ))}
             <TextInput

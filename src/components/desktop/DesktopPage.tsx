@@ -8,9 +8,9 @@ import { useDialog } from '@/lib/ask';
 import { useIsDesktop } from '@/lib/useDesktop';
 import { useDesk } from '@/store/desk';
 import { orderBlocks, useLayout } from '@/store/layout';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
-import { ADD_KEY, BACKDROP, DRAG_REGION, FRAME_PAD, PAGE_MAX, SHEET_RADIUS } from './frame';
+import { ADD_KEY, DRAG_REGION, FRAME_PAD, PAGE_MAX, SHEET_RADIUS } from './frame';
 import { Sidebar } from './Sidebar';
 
 type Hover = { hovered?: boolean };
@@ -118,8 +118,8 @@ export function DesktopPage({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, flexDirection: 'row', backgroundColor: BACKDROP },
+const styles = themed((colors) => StyleSheet.create({
+  root: { flex: 1, flexDirection: 'row', backgroundColor: colors.backdrop },
   // Same box as the home workspace, so the window doesn't change shape between pages.
   work: {
     flex: 1,
@@ -147,4 +147,4 @@ const styles = StyleSheet.create({
   key: { fontFamily: fonts.medium, fontSize: 11.5, color: colors.faint },
   area: { flex: 1, alignItems: 'center', paddingHorizontal: 28 },
   column: { flex: 1, width: '100%' },
-});
+}));

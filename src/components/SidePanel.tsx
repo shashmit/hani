@@ -342,7 +342,7 @@ const styles = themed((colors) =>
   StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.ground, overflow: 'hidden' },
   layer: { flex: 1 },
-  home: { backgroundColor: '#2A1D14' },
+  home: { backgroundColor: colors.backdrop },
   plain: { backgroundColor: 'transparent', overflow: 'visible' },
   }),
 );

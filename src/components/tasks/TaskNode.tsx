@@ -110,7 +110,7 @@ export function TaskNode(props: Props) {
 }
 
 const PRIORITY_LOOK = themed((colors) => ({
-  low: { bg: colors.sageSoft, fg: isDark() ? '#9FCFA4' : colors.forest },
+  low: { bg: colors.sageSoft, fg: colors.forestInk },
   med: { bg: colors.honeySoft, fg: isDark() ? '#F3C46A' : '#7A4A00' },
   high: { bg: colors.dangerSoft, fg: isDark() ? '#F29A8B' : '#93261A' },
 }));

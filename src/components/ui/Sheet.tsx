@@ -94,7 +94,7 @@ export function Sheet({
             hitSlop={8}
             accessibilityLabel="Close"
           >
-            <Feather name="x" size={18} color={colors.forest} />
+            <Feather name="x" size={18} color={colors.forestInk} />
           </Pressable>
         </View>
   );

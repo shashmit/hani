@@ -12,7 +12,7 @@ import { flattenCollections, isLive, scopeKey, useBookmarks, type BookmarkScope 
 import { useExpenses } from '@/store/expenses';
 import { useNotes } from '@/store/notes';
 import { useTasks } from '@/store/tasks';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 import { useBookmarkActions } from '../bookmarks/useBookmarkActions';
 import { DRAG_REGION, MOD, ON_BARK, RAIL_W, SIDEBAR_W, TOP_CLEAR } from './frame';
@@ -399,7 +399,7 @@ function IconButton({ icon, label, on, onPress }: { icon: Icon; label: string; o
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed((colors) => StyleSheet.create({
   root: { paddingBottom: 10 },
   clear: { height: TOP_CLEAR },
   clearRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8 },
@@ -502,4 +502,4 @@ const styles = StyleSheet.create({
   railItem: { width: 44, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   railOn: { backgroundColor: ON_BARK.text },
   railFoot: { alignItems: 'center', gap: 2 },
-});
+}));

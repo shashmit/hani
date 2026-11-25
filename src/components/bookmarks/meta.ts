@@ -29,14 +29,14 @@ export const typeInfo = (t: BookmarkType) => TYPES.find((x) => x.type === t)!;
 
 export const TAG_COLOR = '#B07A1E';
 
-/** The four places every bookmark can be seen from, besides your collections. */
+/** The four places every bookmark can be seen from, besides your collections. Theme colours are read live. */
 export const SYSTEM: Record<
   'all' | 'unsorted' | 'favorites' | 'trash',
   { name: string; blurb: string; icon: IconName; color: string }
 > = {
-  all: { name: 'All items', blurb: 'Every link you saved', icon: 'layers', color: colors.forest },
+  all: { name: 'All items', blurb: 'Every link you saved', icon: 'layers', get color() { return colors.forest; } },
   unsorted: { name: 'Unsorted', blurb: 'Not in a collection', icon: 'inbox', color: '#7B6A5C' },
-  favorites: { name: 'Favorites', blurb: 'Starred links', icon: 'star', color: colors.honeyDeep },
+  favorites: { name: 'Favorites', blurb: 'Starred links', icon: 'star', get color() { return colors.honeyDeep; } },
   trash: { name: 'Trash', blurb: 'Deleted links', icon: 'trash-2', color: '#B5483A' },
 };
 

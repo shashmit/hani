@@ -20,7 +20,7 @@ import { DialogHost } from '@/components/ui/DialogHost';
 import { MotionClock } from '@/lib/motion';
 import { useIsDesktop } from '@/lib/useDesktop';
 import { usePrefs } from '@/store/prefs';
-import { applyScheme, colors, themed } from '@/theme';
+import { applyTheme, colors, themed } from '@/theme';
 
 // Keep the native splash (Hazel with her acorn) up until fonts are in; the in-app
 // intro then takes over from the very same picture.
@@ -47,18 +47,20 @@ export default function RootLayout() {
   const desktop = useIsDesktop();
   const sheet = desktop ? desktopSheet : phoneSheet;
 
-  // Follow the phone's light/dark setting. The palette swaps before anything below
-  // renders, and the tree is redrawn (keyed by scheme) so every screen picks it up.
+  // Follow the chosen colour theme and the phone's light/dark setting. The palette swaps before anything below
+  // renders, and the tree is redrawn (keyed by theme and scheme) so every screen picks it up.
   // The web build (desktop) stays light for now.
   const system = useColorScheme();
   const themePref = usePrefs((s) => s.theme);
   const wanted = themePref === 'system' ? system : themePref;
   const scheme = Platform.OS !== 'web' && wanted === 'dark' ? 'dark' : 'light';
-  applyScheme(scheme);
+  const palette = usePrefs((s) => s.palette);
+  applyTheme(palette, scheme);
+  const look = `${palette}-${scheme}`;
   useEffect(() => {
     // Behind the app: what shows during sheet transitions and the keyboard's slide.
     SystemUI.setBackgroundColorAsync(colors.bg).catch(() => {});
-  }, [scheme]);
+  }, [look]);
 
   const [loaded] = useFonts({
     InterTight_400Regular,
@@ -84,7 +86,7 @@ export default function RootLayout() {
       {/* The app draws edge to edge, so the window never resizes for the keyboard; this
           tracks it frame by frame instead (see Sheet, the note editor, the notes tree). */}
       <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
-      <MotionClock key={scheme}>
+      <MotionClock key={look}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
           <Stack.Screen name="index" />

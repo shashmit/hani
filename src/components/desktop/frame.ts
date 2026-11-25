@@ -1,8 +1,5 @@
 /** Shared look of the desktop window: bark frame, sidebar on the bark, one rounded workspace. */
 
-/** Same bark backdrop the phone's sheets sit on. */
-export const BACKDROP = '#2A1D14';
-
 /** Marks an element as a handle for moving the Tauri window (web-only `dataSet` → `data-*`). */
 export const DRAG_REGION = { dataSet: { tauriDragRegion: '' } } as object;
 

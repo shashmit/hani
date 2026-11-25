@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useRef, useState, type ComponentRef, type ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,7 +23,7 @@ import { orderBlocks, useLayout } from '@/store/layout';
 import { useNotes } from '@/store/notes';
 import { usePrefs, type ThemePref } from '@/store/prefs';
 import { useTasks } from '@/store/tasks';
-import { colors, fonts, isDark, themed } from '@/theme';
+import { colors, fonts, isDark, themed, THEMES as COLOR_THEMES, themeNamed, type Palette } from '@/theme';
 
 const tick = () => Haptics.selectionAsync().catch(() => {});
 const success = () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
@@ -32,7 +32,7 @@ type SectionKey = 'general' | 'money' | 'tasks' | 'bookmarks' | 'notes';
 
 /** `blurb` is the line under a section's title on desktop, where each section is its own pane. */
 const SECTIONS: { key: SectionKey; title: string; blurb: string; icon: IconName; color: string }[] = [
-  { key: 'general', title: 'General', blurb: 'The order of your blocks, and backups', icon: 'sliders', color: '#1F4A36' },
+  { key: 'general', title: 'General', blurb: 'Colors, the order of your blocks, and backups', icon: 'sliders', get color() { return colors.forest; } },
   { key: 'money', title: 'Money', blurb: 'Currency, budget and places', icon: 'credit-card', color: '#E08A32' },
   { key: 'tasks', title: 'Tasks', blurb: 'Tidy up what is left over and what is done', icon: 'check-circle', color: '#5E9A4E' },
   { key: 'bookmarks', title: 'Bookmarks', blurb: 'Import links, choose how they show, empty the Trash', icon: 'bookmark', color: '#3F7C9E' },
@@ -44,9 +44,6 @@ const THEMES: { value: ThemePref; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ];
-/** Swatches for the little theme previews: [ground, card, ink]. */
-const LIGHT_SWATCH = ['#F7F0E2', '#FFFCF5', '#2A1D14'] as const;
-const DARK_SWATCH = ['#18130F', '#2A211A', '#F3E9D8'] as const;
 
 /**
  * Settings, opened by tapping Hazel on the dock. A strip of section tabs follows your
@@ -60,7 +57,7 @@ const onWeb = Platform.OS === 'web';
 
 export default function Settings() {
   const desktop = useIsDesktop();
-  const { theme, setTheme } = usePrefs();
+  const { theme, setTheme, palette, setPalette } = usePrefs();
   const { order, setOrder } = useLayout();
   const { currency, setCurrency, monthlyBudget, places, expenses } = useExpenses();
   const { tasks, bringOverdueTo, removeTask } = useTasks();
@@ -153,14 +150,31 @@ export default function Settings() {
           0,
           null,
           <>
-            {/* The desktop app is light only for now, so it has no theme to choose. */}
+            <Group label="Colors">
+              <View style={styles.palettes}>
+                {COLOR_THEMES.map((t) => (
+                  <ThemeTile
+                    key={t.key}
+                    style={desktop ? styles.paletteTileWide : styles.paletteTile}
+                    looks={[isDark() ? t.dark : t.light]}
+                    label={t.name}
+                    on={themeNamed(palette).key === t.key}
+                    onPress={() => setPalette(t.key)}
+                  />
+                ))}
+              </View>
+            </Group>
+            <Line />
+            {/* The desktop app is light only for now, so it has no light or dark to choose. */}
             {!onWeb && (
               <>
-                <Group label="Appearance" help="Auto follows your phone's light or dark theme.">
+                <Group label="Light or dark" help="Auto follows your phone's setting.">
                   <View style={styles.themes}>
-                    {THEMES.map((t) => (
-                      <ThemeTile key={t.value} value={t.value} label={t.label} on={theme === t.value} onPress={() => setTheme(t.value)} />
-                    ))}
+                    {THEMES.map((t) => {
+                      const now = themeNamed(palette);
+                      const looks = t.value === 'system' ? [now.light, now.dark] : [t.value === 'dark' ? now.dark : now.light];
+                      return <ThemeTile key={t.value} style={styles.modeTile} looks={looks} label={t.label} on={theme === t.value} onPress={() => setTheme(t.value)} />;
+                    })}
                   </View>
                 </Group>
                 <Line />
@@ -520,30 +534,41 @@ function Group({ label, help, children }: { label: string; help?: string; childr
 
 const Line = () => <View style={styles.line} />;
 
-/** A tiny picture of the app in that theme; Auto shows half and half. */
-function ThemeTile({ value, label, on, onPress }: { value: ThemePref; label: string; on: boolean; onPress: () => void }) {
-  const halves = value === 'system' ? [LIGHT_SWATCH, DARK_SWATCH] : [value === 'dark' ? DARK_SWATCH : LIGHT_SWATCH];
+/** A tiny picture of the app in a palette; with two palettes (Auto) it shows half and half. */
+function ThemeTile({
+  looks,
+  label,
+  on,
+  onPress,
+  style,
+}: {
+  looks: Palette[];
+  label: string;
+  on: boolean;
+  onPress: () => void;
+  style?: StyleProp<ViewStyle>;
+}) {
   return (
     <Pressable
       onPress={() => {
         tick();
         onPress();
       }}
-      style={({ pressed }) => [styles.themeTile, on && styles.themeTileOn, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.themeTile, style, on && styles.themeTileOn, pressed && styles.pressed]}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
       accessibilityLabel={label}
     >
       <View style={styles.preview}>
-        {halves.map(([ground, card, ink], i) => (
-          <View key={i} style={[styles.previewHalf, { backgroundColor: ground }]}>
-            <View style={[styles.previewHero, { backgroundColor: '#1F4A36' }]} />
-            <View style={[styles.previewCard, { backgroundColor: card }]}>
-              <View style={[styles.previewInk, { backgroundColor: ink }]} />
+        {looks.map((p, i) => (
+          <View key={i} style={[styles.previewHalf, { backgroundColor: p.ground }]}>
+            <View style={[styles.previewHero, { backgroundColor: p.forest }]} />
+            <View style={[styles.previewCard, { backgroundColor: p.surface }]}>
+              <View style={[styles.previewInk, { backgroundColor: p.ink }]} />
             </View>
           </View>
         ))}
-        <View style={styles.previewDot} />
+        <View style={[styles.previewDot, { backgroundColor: looks[looks.length - 1].honey }]} />
       </View>
       <View style={styles.themeFoot}>
         <Text style={[styles.themeText, on && styles.themeTextOn]}>{label}</Text>
@@ -659,14 +684,19 @@ const styles = themed((colors) =>
     line: { height: 1, backgroundColor: colors.line, opacity: 0.7, marginLeft: 56, marginRight: 8 },
 
     themes: { flexDirection: 'row', gap: 8 },
-    themeTile: { flex: 1, borderRadius: 20, borderCurve: 'continuous', backgroundColor: colors.chip, padding: 6, gap: 6 },
+    palettes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    modeTile: { flex: 1 },
+    // Three to a row on a phone, all six in one row on desktop.
+    paletteTile: { flexBasis: '30%', flexGrow: 1 },
+    paletteTileWide: { flexBasis: '14%', flexGrow: 1 },
+    themeTile: { borderRadius: 20, borderCurve: 'continuous', backgroundColor: colors.chip, padding: 6, gap: 6 },
     themeTileOn: { backgroundColor: colors.forest },
     preview: { height: 62, borderRadius: 15, overflow: 'hidden', flexDirection: 'row' },
     previewHalf: { flex: 1, padding: 6, gap: 5 },
     previewHero: { height: 18, borderRadius: 6 },
     previewCard: { flex: 1, borderRadius: 6, padding: 5, justifyContent: 'center' },
     previewInk: { height: 4, width: '60%', borderRadius: 2, opacity: 0.8 },
-    previewDot: { position: 'absolute', right: 6, bottom: 6, width: 12, height: 12, borderRadius: 6, backgroundColor: '#F6B845' },
+    previewDot: { position: 'absolute', right: 6, bottom: 6, width: 12, height: 12, borderRadius: 6 },
     themeFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, height: 22 },
     themeText: { fontFamily: fonts.semibold, fontSize: 13.5, color: colors.ink },
     themeTextOn: { color: colors.cream },

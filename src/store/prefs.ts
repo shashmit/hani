@@ -2,6 +2,8 @@ import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import type { ThemeName } from '@/theme';
+
 import { deviceStorage } from './storage';
 
 export type ThemePref = 'system' | 'light' | 'dark';
@@ -16,6 +18,9 @@ type PrefsState = {
   /** Light, dark, or whatever the phone is set to. */
   theme: ThemePref;
   setTheme: (t: ThemePref) => void;
+  /** Which colour theme (Woodland, Sagebrush, ...). */
+  palette: ThemeName;
+  setPalette: (p: ThemeName) => void;
 };
 
 export const usePrefs = create<PrefsState>()(
@@ -27,6 +32,8 @@ export const usePrefs = create<PrefsState>()(
       setGuided: (guided) => set({ guided }),
       theme: 'system',
       setTheme: (theme) => set({ theme }),
+      palette: 'woodland',
+      setPalette: (palette) => set({ palette }),
     }),
     {
       name: 'hani.prefs',

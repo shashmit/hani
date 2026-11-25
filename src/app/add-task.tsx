@@ -68,7 +68,7 @@ export default function AddTask() {
     >
       {parent && (
         <View style={styles.parent}>
-          <Feather name="corner-down-right" size={16} color={colors.forest} />
+          <Feather name="corner-down-right" size={16} color={colors.forestInk} />
           <View style={{ flex: 1 }}>
             <Text style={styles.parentLabel}>Under</Text>
             <Text style={styles.parentTitle} numberOfLines={2}>

@@ -301,8 +301,8 @@ export function CollectionPage() {
                   accessibilityRole="button"
                   accessibilityLabel={`New collection inside ${active.title}`}
                 >
-                  <Feather name="folder-plus" size={16} color={colors.forest} />
-                  <Text style={[styles.folderText, { color: colors.forest }]}>
+                  <Feather name="folder-plus" size={16} color={colors.forestInk} />
+                  <Text style={[styles.folderText, { color: colors.forestInk }]}>
                     {children.length ? 'New' : 'New collection inside'}
                   </Text>
                 </Pressable>
@@ -316,7 +316,7 @@ export function CollectionPage() {
                 {filtering && (
                   <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)}>
                     <Pressable onPress={clearFilters} hitSlop={8} style={styles.clear} accessibilityRole="button">
-                      <Feather name="x" size={12} color={colors.forest} />
+                      <Feather name="x" size={12} color={colors.forestInk} />
                       <Text style={styles.clearText}>Clear filters</Text>
                     </Pressable>
                   </Animated.View>

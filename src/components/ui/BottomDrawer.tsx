@@ -421,7 +421,7 @@ export function FilterButton({
         picked.lead
       ) : (
         <View style={styles.fbtnIcon}>
-          <Feather name={icon} size={15} color={colors.forest} />
+          <Feather name={icon} size={15} color={colors.forestInk} />
         </View>
       )}
       <View style={{ flex: 1, minWidth: 0 }}>
